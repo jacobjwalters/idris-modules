@@ -13,7 +13,8 @@ authors = "Jacob Walters"
 -- langversion
 
 -- packages to add to search path
--- depends =
+depends = base >= 0.7.0
+        , elab-util
 
 -- modules to install
 modules = Language.Modules
