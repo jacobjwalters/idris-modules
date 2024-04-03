@@ -15,19 +15,21 @@ record Declaration where
   constructor MkDecl
   vis : Visibility
   name : Name
-  type : Type  -- revisit for erasure?
+  type : Type
   val : type
+ 
+export
+Eq Declaration where
+  d1 == d2 = d1.name == d2.name
+export
+Ord Declaration where
+  compare d1 d2 = compare d1.name d2.name
   
 ||| Pretty print a `Declaration`.
 export
 ppDecl : Declaration -> String
-ppDecl (MkDecl vis name type val) = "\{show vis} \{show name}"  -- TODO: show type?
+ppDecl (MkDecl vis name type val) = "\{show vis} \{show name}"
 
-||| Updates the namespace of the `Declaration` to the supplied one.
-export
-updateDeclNS : Namespace -> Declaration -> Declaration
-updateDeclNS ns (MkDecl vis nm ty val) = MkDecl vis (inNS nm ns) ty val
-  
 ||| Gets the `Visibility` (export modifier) of a `Name`.
 getVisibility : Name -> Elab Visibility
 getVisibility name = case !(getVis name) of
@@ -40,13 +42,13 @@ getVisibility name = case !(getVis name) of
 
 ||| Safe constructor for a `Declaration`, given the name of an already existing Idris declaration.
 export
-mkDecl : Namespace -> Name -> Elab Declaration
-mkDecl ns name = do
-  tys <- getType name  -- TODO don't just get the first match!
+genDecl : Name -> Elab Declaration
+genDecl name = do
+  tys <- getType name
   case tys of
     []            => fail "I don't know what \"\{show name}\" is!"
     [(nm, ttimp)] => pure $ MkDecl !(getVisibility name)
-                                   (inNS name ns)
+                                   (dropNS name)
                                    !(check ttimp)
                                    !(check $ IVar EmptyFC nm)
     _ => let

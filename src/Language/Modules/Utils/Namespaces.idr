@@ -1,5 +1,7 @@
 module Language.Modules.Utils.Namespaces
   
+import Data.String
+import Data.List1
 import Language.Reflection
 
 ||| Appends a chosen `Name` to the supplied `Namespace`.
@@ -26,9 +28,13 @@ export
 newNS : Name -> Elab Namespace
 newNS name = pure $ nsCons name !currentNS
 
-export
 ||| Sets the namespace of a `Name` to the supplied `Namespace`.
+export
 inNS : Name -> Namespace -> Name
 inNS (NS ns' nm) ns = NS ns nm
 inNS nm          ns = NS ns nm
 
+||| Converts a qualified `String` (e.g. `"A.B.C"`) into a `Namespace`.
+public export
+stringToNS : String -> Namespace
+stringToNS str = MkNS $ toList $ reverse $ split (== '.') str

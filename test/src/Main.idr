@@ -1,49 +1,43 @@
 module Main
   
 import Language.Modules
+--import Language.Modules.Utils.Namespaces
+
+import AlgebraicHierarchy
   
 %language ElabReflection
 
-namespace Defs
-  export Set : Type
-  export unit : Set
-  export append : Set -> Set -> Set
-  export neg : Set -> Set
-
-mon : Module
-mon = %runElab genMod `{Mon} [`{Set}, `{unit}, `{append}]
-
-negs : Module
-negs = %runElab genMod `{Negs} [`{Set}, `{neg}]
-
-additiveMonoid = %runElab renameMod `{AdditiveMonoid}
-               $ %runElab renameInMod `{unit} `{zero}
-               $ %runElab renameInMod `{append} `{(+)} mon
-
-semigroup = %runElab delFromMod `{unit} mon
-
-group = %runElab combineMods `{Group} mon negs [`{Set}]
-  
-%runElab reifyMod group
-  
--- TODO check out FromElab
-
-mon' = `[
-namespace Mon
-  private
-  Set : Type
-  unit : Set
-  append : Set -> Set -> Set]
-  
 private       fooP  : Int
 export        fooE  : Int
 public export fooPE : Int
-  
-visTest = %runElab genMod `{VisTest} [`{fooP}, `{fooE}, `{fooPE}]
-  
-bar : Int -> Int
-bar a = 1 + a
+visTest = %runElab genMod [`{fooP}, `{fooE}, `{fooPE}]
 
-
+{-
+%runElab set.reify (MkNS ["Set", "Algebra"])
+%runElab magma.reify (MkNS ["Magma", "Algebra"])
+%runElab leftUnitalMagma.reify (MkNS ["Left", "Unital", "Magma", "Algebra"])
+%runElab rightUnitalMagma.reify (MkNS ["Right", "Unital", "Magma", "Algebra"])
+%runElab unitalMagma.reify (MkNS ["Unital", "Magma", "Algebra"])
+%runElab leftQuasigroup.reify (MkNS ["Left", "Quasigroup", "Algebra"])
+%runElab rightQuasigroup.reify (MkNS ["Right", "Quasigroup", "Algebra"])
+%runElab quasigroup.reify (MkNS ["Quasigroup", "Algebra"])
+%runElab associativeQuasigroup.reify (MkNS ["Associative", "Quasigroup", "Algebra"])
+%runElab semigroup.reify (MkNS ["Semigroup", "Algebra"])
+%runElab leftUnitalSemigroup.reify (MkNS ["Left", "Unital", "Semigroup", "Algebra"])
+%runElab rightUnitalSemigroup.reify (MkNS ["Right", "Unital", "Semigroup", "Algebra"])
+%runElab monoid.reify (MkNS ["Monoid", "Algebra"])
+%runElab leftUnitalLoop.reify (MkNS ["Left", "Unital", "Loop", "Algebra"])
+%runElab rightUnitalLoop.reify (MkNS ["Right", "Unital", "Loop", "Algebra"])
+%runElab loop.reify (MkNS ["Loop", "Algebra"])
+%runElab group.reify (MkNS ["Group", "Algebra"])
+-}
+  
+linEven : (1 x : Nat) -> Bool
+linEven 0 = True
+linEven (S 0) = False
+linEven (S (S k)) = linEven k
+  
+%runElab reifyMod (MkNS ["Even", "Linear"]) (%runElab genMod [`{linEven}])
+  
 main : IO ()
 main = putStrLn "Elab scripts worked!"
